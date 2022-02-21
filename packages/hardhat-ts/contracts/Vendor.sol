@@ -17,7 +17,7 @@ contract Vendor is Ownable {
   event BuyToken(address buyer, uint256 amountOfEth, uint256 amountOfTokens);
 
   function buyTokens() external payable {
-    uint256 etherSent = weiToEth(msg.value);
+    uint256 etherSent = convertUnit('toEther', msg.value);
     uint256 tokensToSend = tokensPerEth * etherSent;
     bool purchaser = hasPurchased[msg.sender];
     if (purchaser == false) purchaser = true;
@@ -26,15 +26,55 @@ contract Vendor is Ownable {
     emit BuyToken(msg.sender, etherSent, tokensToSend);
   }
 
-  function weiToEth(uint256 _wei) private pure returns (uint256 _ether) {
-    _ether = _wei * 10**18;
+  function convertUnit(string memory _unit, uint256 _amount) private pure returns (uint256) {
+    uint256 _ether = _amount * 10**18;
+    uint256 _wei = _amount / 10**18;
+    if (compareStrings(_unit, 'toWei')) return _wei;
+    if (compareStrings(_unit, 'toEther')) return _ether;
   }
 
-  // ToDo: create a withdraw() function that lets the owner withdraw ETH
+  function compareStrings(string memory _s1, string memory _s2) private pure returns (bool _isEqual) {
+    bytes32 s1 = keccak256(abi.encodePacked(_s1));
+    bytes32 s2 = keccak256(abi.encodePacked(_s2));
+    _isEqual = (s1 == s2);
+  }
+
   function withdraw() external onlyOwner {
     address _owner = payable(msg.sender);
     (bool success, ) = _owner.call{value: address(this).balance}('');
     require(success, 'withdrawl not successfull');
   }
+
+  modifier vendApproveToken(uint256 _amount) {
+    bool _success = yourToken.approve(address(this), _amount);
+    require(_success, '!!Vendor Not Approved!!');
+    _;
+  }
+
+  modifier canSell(address _seller) {
+    bool _canSell = hasPurchased[_seller];
+    uint256 _tokenBalance = tokenBalances[_seller];
+    require(_canSell, 'Must have purchased tokens');
+    require(_tokenBalance > 0, 'Must have tokens');
+    _;
+  }
+
+  function vendorTransfer(uint256 _tokens) private returns (bool _didTransfer) {
+    _didTransfer = yourToken.transferFrom(msg.sender, address(this), _tokens);
+    require(_didTransfer, 'Transfer Unsuccessful');
+  }
+
   // ToDo: create a sellTokens() function:
+  //user first must call yourToken.approve(address(this), amountOfTokens), returtns bool
+  //then ourToken must transferFrom the msg.sender to THIS address, the amountOfTokens
+  //ethToSend = tokenAmount * tokens per ether
+  function sellToken(uint256 _tokenAmount) external vendApproveToken(_tokenAmount) canSell(msg.sender) {
+    //emits Transfer(address _to, address _from, uint _amount)
+    vendorTransfer(_tokenAmount);
+    uint256 ethToSend = _tokenAmount / tokensPerEth;
+    uint256 weiToSend = convertUnit('toWei', ethToSend);
+    //using .call rather than .send in the event of nonStandard gas fees
+    (bool success, ) = payable(msg.sender).call{value: weiToSend}('');
+    require(success, 'Sale not successful.');
+  }
 }
