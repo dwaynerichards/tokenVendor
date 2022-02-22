@@ -1,6 +1,5 @@
 pragma solidity >=0.8.0 <0.9.0;
 // SPDX-License-Identifier: MIT
-
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './YourToken.sol';
 
@@ -47,6 +46,9 @@ contract Vendor is Ownable {
 
   modifier vendApproveToken(uint256 _amount) {
     bool _success = yourToken.approve(address(this), _amount);
+    //emits Approval(address owner, address spender, uint value)
+    //Approval(yourToken.address, msg.sender, _amount)
+    console.log('Approval emitted with tokenContractAddress: %s, msgSpender: %s, value: %s', address(yourToken), msg.sender, _amount);
     require(_success, '!!Vendor Not Approved!!');
     _;
   }
@@ -62,6 +64,8 @@ contract Vendor is Ownable {
   function vendorTransfer(uint256 _tokens) private returns (bool _didTransfer) {
     _didTransfer = yourToken.transferFrom(msg.sender, address(this), _tokens);
     require(_didTransfer, 'Transfer Unsuccessful');
+    //emits Transfer(address _from, address _to, uint _amount)
+    console.log('Transfer emitted from: %s, tp: %s, amount: %s', msg.sender, address(this), _tokens);
   }
 
   // ToDo: create a sellTokens() function:
@@ -69,7 +73,6 @@ contract Vendor is Ownable {
   //then ourToken must transferFrom the msg.sender to THIS address, the amountOfTokens
   //ethToSend = tokenAmount * tokens per ether
   function sellToken(uint256 _tokenAmount) external vendApproveToken(_tokenAmount) canSell(msg.sender) {
-    //emits Transfer(address _to, address _from, uint _amount)
     vendorTransfer(_tokenAmount);
     uint256 ethToSend = _tokenAmount / tokensPerEth;
     uint256 weiToSend = convertUnit('toWei', ethToSend);
