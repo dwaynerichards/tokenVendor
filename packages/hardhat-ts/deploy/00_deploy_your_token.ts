@@ -4,7 +4,7 @@ import { HardhatRuntimeEnvironmentExtended } from 'helpers/types/hardhat-type-ex
 import { ethers } from 'hardhat';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
-  const { getNamedAccounts, deployments } = hre as any;
+  const { getNamedAccounts, deployments } = hre;
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
   await deploy('YourToken', {
@@ -14,10 +14,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
     log: true,
   });
 
-  const yourToken = await ethers.getContract('YourToken', deployer);
+  const YourToken = await ethers.getContract('YourToken');
 
   // Todo: transfer tokens to frontend address
-  const result = await yourToken.transfer('0x88E0c097d8e20FDafb05bF419CF60Cf8233F72f0', ethers.utils.parseEther('1000'));
+  //const result = await yourToken.transfer('0x88E0c097d8e20FDafb05bF419CF60Cf8233F72f0', ethers.utils.parseEther('1000'));
 
   // ToDo: To take ownership of yourContract using the ownable library uncomment next line and add the
   // address you want to be the owner.

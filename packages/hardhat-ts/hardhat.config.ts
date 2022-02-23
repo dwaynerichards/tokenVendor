@@ -44,7 +44,9 @@ const getMnemonic = () => {
   } catch (e) {
     // @ts-ignore
     if (defaultNetwork !== 'localhost') {
-      console.log('☢️ WARNING: No mnemonic file created for a deploy account. Try `yarn run generate` and then `yarn run account`.');
+      console.log(
+        '☢️ WARNING: No mnemonic file created for a deploy account. Try `yarn run generate` and then `yarn run account`.'
+      );
     }
   }
   return '';
@@ -63,6 +65,7 @@ const config: HardhatUserConfig = {
   // (you will need to restart the `yarn run start` dev server after editing the .env)
 
   networks: {
+    hardhat: {},
     localhost: {
       url: 'http://localhost:8545',
       /*
