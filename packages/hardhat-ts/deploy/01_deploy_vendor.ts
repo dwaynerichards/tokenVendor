@@ -8,7 +8,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
     const { getNamedAccounts, deployments } = hre as any;
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
-
+    //Since we already ran the deploy script, we can easily access the deployed contract by name
     const YourToken = await ethers.getContract('YourToken', deployer);
 
     await deploy('Vendor', {
@@ -29,14 +29,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
       formatEther(totalSupply)
     );
     console.log('\n 🏵  Sending all 1000 tokens to the Vendor...\n');
-    //@dev owner: inherited from Ownable standard, returns addresconst frontEnd = s
+    //@dev owner: inherited from Ownable standard, returns  address
     const ownerAddress = await YourToken.owner();
     const balanceOf = await YourToken.balanceOf(ownerAddress);
     console.log('\n token balance of ownerAddress \n:', formatEther(balanceOf));
     await YourToken.transfer(Vendor.address, totalSupply);
-    //await YourToken.transferFrom(ownerAddress, Vendor.address, ethers.utils.parseEther('1000'));
-    // await Vendor.transferOwnership("**YOUR FRONTEND ADDRESS**");
-    console.log('transfering ownership to frontend address');
+    console.log('\ntransfering ownership to frontend address\n');
     await Vendor.transferOwnership('0x88e0c097d8e20fdafb05bf419cf60cf8233f72f0');
   } catch (err) {
     console.log('Error: ', err);
