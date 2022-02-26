@@ -19,6 +19,7 @@ contract Vendor is Ownable, AccessControl {
 
     event BuyTokens(address buyer, uint256 amountOfEth, uint256 amountOfTokens);
     event SellTokens(address seller, uint256 amountOfEth, uint256 amountOfTokens);
+    event WithdrawEther(address to, uint amountOfEth, bool success);
 
     function buyTokens() external payable {
         require(locked, "Transaction not allowed while locked");
@@ -31,8 +32,7 @@ contract Vendor is Ownable, AccessControl {
         emit BuyTokens(msg.sender, etherSent, tokensToSend);
         bool success = yourToken.transfer(msg.sender, tokensToSend);
         uint256 buyerTokens = yourToken.balanceOf(msg.sender);
-        console.log("%s wei converted to %s ether", msg.value, etherSent);
-        console.log("%s account purchased %s tokens for %s ether", msg.sender, tokensToSend, etherSent);
+        console.log("%s sent %s wei converted to %s ether", msg.sender, msg.value, etherSent);
         console.log("%s has %s tokens post transfer: ", msg.sender, buyerTokens);
         console.log("has purcahsed been placed in mapping: %s", hasPurchased[msg.sender]);
         locked = true;
@@ -61,7 +61,9 @@ contract Vendor is Ownable, AccessControl {
     function withdraw() external ownerOrAdmin {
         address _owner = payable(msg.sender);
         console.log("withdrawing to caller: %s", msg.sender);
-        (bool success, ) = _owner.call{value: address(this).balance}("");
+        uint contractFunds = address(this).balance;
+        (bool success, ) = _owner.call{value: contractFunds}("");
+        emit WithdrawEther(msg.sender, contractFunds, success);
         require(success, "withdrawl not successfull");
     }
 
@@ -77,12 +79,10 @@ contract Vendor is Ownable, AccessControl {
     function vendorTransfer(uint256 _tokens) private returns (bool _didTransfer) {
         _didTransfer = yourToken.transferFrom(msg.sender, address(this), _tokens);
         require(_didTransfer, "Transfer Unsuccessful");
-        //emits Transfer(address _from, address _to, uint _amount)
         console.log("Transfer emitted from: %s, tp: %s, amount: %s", msg.sender, address(this), _tokens);
     }
 
     function sellToken(uint256 _tokenAmount) external canSell(msg.sender) {
-        //yourToken.approve(address(this), _tokenAmount);
         vendorTransfer(_tokenAmount);
         uint256 ethToSend = _tokenAmount / tokensPerEth;
         uint256 weiToSend = convertUnit("toWei", ethToSend);

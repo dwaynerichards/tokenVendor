@@ -105,10 +105,17 @@ describe('YourToken', async () => {
     const { admins, signers, Vendor, YourToken } = await setup('admin');
     const signer = signers[0];
     const admin = admins![0] as signer;
+    const checker = await ethers.getSigner(admin.address);
     await signer.Vendor.buyTokens(oneEth);
+    await admin.Vendor.buyTokens(oneEth);
     const vendorBalance = await Vendor.balance();
     await expect(signer.Vendor.withdraw()).to.be.revertedWith('Caller requires role.');
-    expect('1.0').to.equal(formatEther(vendorBalance));
-    await admin.Vendor.withdraw();
+    expect('2.0').to.equal(formatEther(vendorBalance));
+    await expect(admin.Vendor.withdraw())
+      .to.emit(Vendor, 'WithdrawEther')
+      .withArgs(admin.address, parseEther('2.0'), true);
+    expect(await Vendor.balance()).to.equal('0');
+    const adminBalance = await checker.getBalance();
+    console.log('big num returned from getBalance on admin:', adminBalance);
   });
 });
