@@ -71,16 +71,8 @@ describe('YourToken', async () => {
     const { signers } = await setup();
     const signer = signers[0];
     await signer.Vendor.buyTokens(oneEth);
-    await expect(signer.Vendor.withdraw()).to.be.revertedWith('Ownable: caller is not the owner');
+    await expect(signer.Vendor.withdraw()).to.be.revertedWith('Caller requires role.');
   });
-  it('should set num', async () => {
-    const { signers } = await setup();
-    const signer = signers[0];
-    await signer.Vendor.setTokenX(5);
-    const number = await signer.YourToken.getNum();
-    expect(number).to.equal(5);
-  });
-
   it('should allow tokens to be sold back to Vendor', async () => {
     const { signers, YourToken, Vendor } = await setup();
     const [signer1, signer2] = [signers[0], signers[1]];
@@ -109,13 +101,14 @@ describe('YourToken', async () => {
   //console.log(await YourToken.allowance(signer1.address, Vendor.address));
   //console.log(await YourToken.allowance(signer2.address, Vendor.address));
 
-  // it('should allow only owner of Vendor contract to withdraw all ether from contract', async () => {
-  //   const { signers, Vendor, YourToken } = await setup();
-  //   const [signer, vendorOwner] = [signers[0], await Vendor.owner()];
-  //   await signer.Vendor.buyTokens(oneEth);
-  //   await signers[1].Vendor.withdraw();
-  //   const vendorBalance = YourToken.balanceOf(vendorOwner);
-  //   expect(utils.formatUnits(vendorBalance, 'wei')).to.equal('1');
-  //   expect(signer.Vendor.withdraw()).to.revertedWith('Ownable: caller is not the owner');
-  // });
+  it('should allow only owner of Vendor contract to withdraw all ether from contract', async () => {
+    const { admins, signers, Vendor, YourToken } = await setup('admin');
+    const signer = signers[0];
+    const admin = admins![0] as signer;
+    await signer.Vendor.buyTokens(oneEth);
+    const vendorBalance = await Vendor.balance();
+    await expect(signer.Vendor.withdraw()).to.be.revertedWith('Caller requires role.');
+    expect('1.0').to.equal(formatEther(vendorBalance));
+    await admin.Vendor.withdraw();
+  });
 });

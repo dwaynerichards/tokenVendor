@@ -58,6 +58,9 @@ const config: HardhatUserConfig = {
     deployer: {
       default: 0, // here this will by default take the first account as deployer
     },
+    admin: {
+      default: 6,
+    },
   },
   // don't forget to set your provider like:
   // REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env

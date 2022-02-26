@@ -1,17 +1,20 @@
 pragma solidity >=0.8.0 <0.9.0;
 // SPDX-License-Identifier: MIT
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./YourToken.sol";
 
-contract Vendor is Ownable {
+contract Vendor is Ownable, AccessControl {
     YourToken yourToken;
+    bytes32 public constant Admin = keccak256("Admin");
     uint256 constant tokensPerEth = 100;
     mapping(address => uint256) tokenBalances;
     mapping(address => bool) hasPurchased;
     bool locked = true;
 
-    constructor(address tokenAddress) {
+    constructor(address tokenAddress, address adminAddress) {
         yourToken = YourToken(tokenAddress);
+        _setupRole(DEFAULT_ADMIN_ROLE, adminAddress);
     }
 
     event BuyTokens(address buyer, uint256 amountOfEth, uint256 amountOfTokens);
@@ -49,8 +52,15 @@ contract Vendor is Ownable {
         _isEqual = (s1 == s2);
     }
 
-    function withdraw() external onlyOwner {
+    modifier ownerOrAdmin() {
+        bool hasAccess = owner() == msg.sender || hasRole(Admin, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        require(hasAccess, "Caller requires role.");
+        _;
+    }
+
+    function withdraw() external ownerOrAdmin {
         address _owner = payable(msg.sender);
+        console.log("withdrawing to caller: %s", msg.sender);
         (bool success, ) = _owner.call{value: address(this).balance}("");
         require(success, "withdrawl not successfull");
     }
@@ -99,9 +109,5 @@ contract Vendor is Ownable {
 
     function balance() external view returns (uint _balance) {
         _balance = address(this).balance;
-    }
-
-    function setTokenX(uint _x) external {
-        yourToken.setNum(_x);
     }
 }

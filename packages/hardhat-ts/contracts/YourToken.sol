@@ -22,12 +22,4 @@ contract YourToken is ERC20, Ownable {
         require(msg.sender == owner(), "MsgSender not Owner");
         require(ownerHasFullBalance, "Balance not minted to owner");
     }
-
-    function setNum(uint _num) external {
-        number = _num;
-    }
-
-    function getNum() external view returns (uint) {
-        return number;
-    }
 }

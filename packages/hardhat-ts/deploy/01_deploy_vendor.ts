@@ -1,19 +1,19 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironmentExtended } from 'helpers/types/hardhat-type-extensions';
 import { ethers } from 'hardhat';
-import { formatEther, parseEther } from 'ethers/lib/utils';
+import { formatEther, parseEther, keccak256, toUtf8Bytes } from 'ethers/lib/utils';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
   try {
     const { getNamedAccounts, deployments } = hre as any;
     const { deploy } = deployments;
-    const { deployer } = await getNamedAccounts();
+    const { deployer, admin } = await getNamedAccounts();
     //Since we already ran the deploy script, we can easily access the deployed contract by name
     const YourToken = await ethers.getContract('YourToken', deployer);
 
     await deploy('Vendor', {
       from: deployer,
-      args: [YourToken.address],
+      args: [YourToken.address, admin],
     });
 
     const Vendor = await ethers.getContract('Vendor', deployer);
@@ -36,6 +36,16 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
     await YourToken.transfer(Vendor.address, totalSupply);
     console.log('\ntransfering ownership to frontend address\n');
     await Vendor.transferOwnership('0x88e0c097d8e20fdafb05bf419cf60cf8233f72f0');
+
+    const strToRole = (str: string) => {
+      const bytes = toUtf8Bytes(str);
+      return keccak256(bytes);
+    };
+
+    const adminHasRole = await Vendor.hasRole(strToRole('Admin'), admin);
+    const venderRole = await Vendor.hasRole(strToRole('DEFAULT_ADMIN_ROLE'), Vendor.address);
+    console.log('does vendor have default role:', venderRole);
+    console.log('does admin have role:', adminHasRole);
   } catch (err) {
     console.log('Error: ', err);
   }

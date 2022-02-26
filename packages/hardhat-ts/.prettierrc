@@ -12,6 +12,7 @@
       "files": "*.sol",
       "options": {
         "printWidth": 120,
+        "semicolons": true,
         "tabWidth": 4,
         "useTabs": false,
         "singleQuote": false,
