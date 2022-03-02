@@ -2,6 +2,7 @@ import setup, { signer } from './utils';
 import { expect } from './utils/chaiSetup';
 import { BigNumber, Signer, utils, Wallet } from 'ethers';
 import { ethers } from 'hardhat';
+import { strToRole } from 'deploy/01_deploy_vendor';
 const { formatEther, parseEther } = utils;
 type returnEth = { [k: string]: BigNumber };
 
@@ -89,17 +90,6 @@ describe('YourToken', async () => {
     expect(await YourToken.balanceOf(signer2.address)).to.equal(0);
     //expect(await YourToken.allowance(signer2.address, Vendor.address)).to.equal(50);
   });
-  //can only owner withddraw eth from vendor
-  //await signer2.Vendor.approveCheck(50).then(async (tx: any) => tx.wait());
-  // const vendAdress = tx.events[0].args[1];
-  // const ownerAddress = tx.events[0].args[0];
-  // const bnHex = tx.events[0].args[2]._hex;
-  // const bn = parseInt(bnHex, 16);
-  // console.log('vendor address are equal', vendAdress.toLowerCase() === Vendor.address.toLowerCase());
-  // console.log('signer address equal', signer2.address.toLowerCase() === ownerAddress);
-  // console.log('bignumber:', bn);
-  //console.log(await YourToken.allowance(signer1.address, Vendor.address));
-  //console.log(await YourToken.allowance(signer2.address, Vendor.address));
 
   it('should allow only owner of Vendor contract to withdraw all ether from contract', async () => {
     const { admins, signers, Vendor, YourToken } = await setup('admin');
@@ -107,7 +97,7 @@ describe('YourToken', async () => {
     const admin = admins![0] as signer;
     const checker = await ethers.getSigner(admin.address);
     await signer.Vendor.buyTokens(oneEth);
-    await admin.Vendor.buyTokens(oneEth);
+    await signers[1].Vendor.buyTokens(oneEth);
     const vendorBalance = await Vendor.balance();
     await expect(signer.Vendor.withdraw()).to.be.revertedWith('Caller requires role.');
     expect('2.0').to.equal(formatEther(vendorBalance));
@@ -115,7 +105,29 @@ describe('YourToken', async () => {
       .to.emit(Vendor, 'WithdrawEther')
       .withArgs(admin.address, parseEther('2.0'), true);
     expect(await Vendor.balance()).to.equal('0');
-    const adminBalance = await checker.getBalance();
+    //@dev after admin withdraws, use ethers
+    const adminBalance = formatEther(await checker.getBalance());
     console.log('big num returned from getBalance on admin:', adminBalance);
+  });
+  it('admin account should have default admin role', async () => {
+    const { admins, Vendor } = await setup('admin');
+    const admin = admins![0] as signer;
+    const defaultAdminRole = await Vendor.DEFAULT_ADMIN_ROLE();
+    console.log('value returned from DEFAULT_ADMIN_ROLE:', defaultAdminRole);
+    const isDefaultAdmin = await Vendor.hasRole(defaultAdminRole, admin.address);
+    expect(isDefaultAdmin).to.equal(true);
+  });
+  it('should allow admin accoutns to assign admin roles', async () => {
+    const { admins, signers, Vendor } = await setup('admin');
+    const admin = admins![0];
+    const signer = signers[0];
+    //grant role, emits event
+    //also check role using has role
+    const Admin = await Vendor.Admin();
+    await expect(admin.Vendor.grantRole(Admin, signer.address))
+      .to.emit(Vendor, 'RoleGranted')
+      .withArgs(Admin, signer.address, admin.address);
+    const isSignerAdmin = await Vendor.hasRole(Admin, signer.address);
+    expect(isSignerAdmin).to.equal(true);
   });
 });

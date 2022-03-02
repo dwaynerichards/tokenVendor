@@ -37,18 +37,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
     console.log('\ntransfering ownership to frontend address\n');
     await Vendor.transferOwnership('0x88e0c097d8e20fdafb05bf419cf60cf8233f72f0');
 
-    const strToRole = (str: string) => {
-      const bytes = toUtf8Bytes(str);
-      return keccak256(bytes);
-    };
-
-    const adminHasRole = await Vendor.hasRole(strToRole('Admin'), admin);
-    const venderRole = await Vendor.hasRole(strToRole('DEFAULT_ADMIN_ROLE'), Vendor.address);
+    const adminHasRole = await Vendor.hasRole(Vendor.DEFAULT_ADMIN_ROLE(), admin);
+    const venderRole = await Vendor.hasRole(Vendor.DEFAULT_ADMIN_ROLE(), Vendor.address);
     console.log('does vendor have default role:', venderRole);
     console.log('does admin have role:', adminHasRole);
   } catch (err) {
     console.log('Error: ', err);
   }
+};
+
+export const strToRole = (str: string) => {
+  const bytes = toUtf8Bytes(str);
+  return keccak256(bytes);
 };
 export default func;
 func.tags = ['Vendor'];

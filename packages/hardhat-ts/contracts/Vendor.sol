@@ -7,7 +7,7 @@ import "./YourToken.sol";
 contract Vendor is Ownable, AccessControl {
     YourToken yourToken;
     bytes32 public constant Admin = keccak256("Admin");
-    uint256 constant tokensPerEth = 100;
+    uint256 public constant tokensPerEth = 100;
     mapping(address => uint256) tokenBalances;
     mapping(address => bool) hasPurchased;
     bool locked = true;
@@ -15,6 +15,8 @@ contract Vendor is Ownable, AccessControl {
     constructor(address tokenAddress, address adminAddress) {
         yourToken = YourToken(tokenAddress);
         _setupRole(DEFAULT_ADMIN_ROLE, adminAddress);
+        bool adminHasRole = hasRole(DEFAULT_ADMIN_ROLE, adminAddress);
+        console.log("admin has been granted role: %s", adminHasRole);
     }
 
     event BuyTokens(address buyer, uint256 amountOfEth, uint256 amountOfTokens);
@@ -34,7 +36,6 @@ contract Vendor is Ownable, AccessControl {
         uint256 buyerTokens = yourToken.balanceOf(msg.sender);
         console.log("%s sent %s wei converted to %s ether", msg.sender, msg.value, etherSent);
         console.log("%s has %s tokens post transfer: ", msg.sender, buyerTokens);
-        console.log("has purcahsed been placed in mapping: %s", hasPurchased[msg.sender]);
         locked = true;
         require(success, "tranfer of tokens not successfull");
     }
@@ -60,8 +61,8 @@ contract Vendor is Ownable, AccessControl {
 
     function withdraw() external ownerOrAdmin {
         address _owner = payable(msg.sender);
-        console.log("withdrawing to caller: %s", msg.sender);
         uint contractFunds = address(this).balance;
+        console.log("withdrawing to caller: %s, funds: %s", msg.sender, contractFunds);
         (bool success, ) = _owner.call{value: contractFunds}("");
         emit WithdrawEther(msg.sender, contractFunds, success);
         require(success, "withdrawl not successfull");
