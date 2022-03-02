@@ -8,8 +8,6 @@ contract Vendor is Ownable, AccessControl {
     YourToken yourToken;
     bytes32 public constant Admin = keccak256("Admin");
     uint256 public constant tokensPerEth = 100;
-    mapping(address => uint256) tokenBalances;
-    mapping(address => bool) hasPurchased;
     bool locked = true;
 
     constructor(address tokenAddress, address adminAddress) {
@@ -26,18 +24,21 @@ contract Vendor is Ownable, AccessControl {
     function buyTokens() external payable {
         require(locked, "Transaction not allowed while locked");
         locked = false;
-        uint256 etherSent = convertUnit("toEther", msg.value);
-        uint256 tokensToSend = tokensPerEth * etherSent;
-
-        if (hasPurchased[msg.sender] == false) hasPurchased[msg.sender] = true;
-        tokenBalances[msg.sender] += tokensToSend;
+        (uint etherSent, uint256 tokensToSend) = _convertTokenAmount(msg.value);
         emit BuyTokens(msg.sender, etherSent, tokensToSend);
         bool success = yourToken.transfer(msg.sender, tokensToSend);
         uint256 buyerTokens = yourToken.balanceOf(msg.sender);
         console.log("%s sent %s wei converted to %s ether", msg.sender, msg.value, etherSent);
-        console.log("%s has %s tokens post transfer: ", msg.sender, buyerTokens);
+        console.log("%s has %s tokens post transfer: ", msg.sender, convertUnit("toEther", buyerTokens));
         locked = true;
         require(success, "tranfer of tokens not successfull");
+    }
+
+    //@dev convets tokens for contract ERC20 contract using 18 decimals
+    function _convertTokenAmount(uint _weiSent) private pure returns (uint _etherSent, uint _tokensToSend) {
+        _etherSent = convertUnit("toEther", _weiSent);
+        uint _tokens = tokensPerEth * _etherSent;
+        _tokensToSend = _tokens * (10**18);
     }
 
     function convertUnit(string memory _unit, uint256 _amount) private pure returns (uint256) {
@@ -68,22 +69,14 @@ contract Vendor is Ownable, AccessControl {
         require(success, "withdrawl not successfull");
     }
 
-    modifier canSell(address _seller) {
-        bool _canSell = hasPurchased[_seller];
-        console.log("attempted sale possible: %s", _canSell);
-        uint256 _tokenBalance = tokenBalances[_seller];
-        require(_canSell, "Must have purchased tokens");
-        require(_tokenBalance > 0, "Must have tokens");
-        _;
-    }
-
     function vendorTransfer(uint256 _tokens) private returns (bool _didTransfer) {
+        _tokens = _tokens * (10**18);
         _didTransfer = yourToken.transferFrom(msg.sender, address(this), _tokens);
         require(_didTransfer, "Transfer Unsuccessful");
         console.log("Transfer emitted from: %s, tp: %s, amount: %s", msg.sender, address(this), _tokens);
     }
 
-    function sellToken(uint256 _tokenAmount) external canSell(msg.sender) {
+    function sellToken(uint _tokenAmount) external {
         vendorTransfer(_tokenAmount);
         uint256 ethToSend = _tokenAmount / tokensPerEth;
         uint256 weiToSend = convertUnit("toWei", ethToSend);

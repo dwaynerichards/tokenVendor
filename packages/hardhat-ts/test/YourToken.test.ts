@@ -7,6 +7,7 @@ const { formatEther, parseEther } = utils;
 type returnEth = { [k: string]: BigNumber };
 
 describe('YourToken', async () => {
+  const hundredTokens = parseEther('100');
   const oneEth = { value: parseEther('1') };
   const formEth = (num: any): returnEth => {
     num = num.toString();
@@ -19,18 +20,6 @@ describe('YourToken', async () => {
     const { YourToken } = await setup();
     return YourToken.balanceOf(_address);
   };
-  it('Pay vendor contract corrent amount for tokens', async () => {
-    const { signers, YourToken, Vendor } = await setup();
-    const [signer1, signer2] = [signers[0], signers[1]];
-    await signer1.Vendor.buyTokens(oneEth);
-    await signer2.Vendor.buyTokens(oneEth);
-    const balance = formatEther(await Vendor.balance());
-    let bn2Eth: any = formEth(2);
-    bn2Eth = bn2Eth.value;
-    console.log(bn2Eth);
-    const twoEther = formatEther(bn2Eth);
-    expect(balance).to.equal(twoEther);
-  });
   it('should mint 1000 tokens', async () => {
     const { signers, YourToken, Vendor } = await setup();
     let totalSupply = await YourToken.totalSupply();
@@ -49,24 +38,36 @@ describe('YourToken', async () => {
     expect(vendorOwner.toLowerCase()).to.equal(frontEnd);
   });
 
+  it('Pay vendor contract corrent amount for tokens', async () => {
+    const { signers, Vendor } = await setup();
+    const [signer1, signer2] = [signers[0], signers[1]];
+    await signer1.Vendor.buyTokens(oneEth);
+    await signer2.Vendor.buyTokens(oneEth);
+    const balance = formatEther(await Vendor.balance());
+    let bn2Eth: any = formEth(2);
+    bn2Eth = bn2Eth.value;
+    const twoEther = formatEther(bn2Eth);
+    expect(balance).to.equal(twoEther);
+  });
   it('should allow correct purchasing amounts', async () => {
     const { signers, YourToken } = await setup();
     const signer = signers[0];
     await signer.Vendor.buyTokens(oneEth);
     console.log('signer address: ', signer.address);
     const signerBalance = await YourToken.balanceOf(signer.address);
-    expect(utils.formatUnits(signerBalance, 'wei')).to.equal('100');
+    expect(formatEther(signerBalance)).to.equal('100.0');
   });
   it('should transfer transfer tokens to differnt accounts', async () => {
     const { signers, YourToken } = await setup();
     const [signer1, signer2] = [signers[0], signers[1]];
     await signer1.Vendor.buyTokens(oneEth);
-    await signer1.YourToken.approve(signer2.address, 100);
-    await signer1.YourToken.transfer(signer2.address, 100);
+    await signer1.YourToken.approve(signer2.address, hundredTokens);
+    await signer1.YourToken.transfer(signer2.address, hundredTokens);
+    console.log('Approval and transfer successful');
     const signerBalance1 = await YourToken.balanceOf(signer1.address);
     const signerBalance2 = await YourToken.balanceOf(signer2.address);
-    expect(utils.formatUnits(signerBalance1, 'wei')).to.equal('0');
-    expect(utils.formatUnits(signerBalance2, 'wei')).to.equal('100');
+    expect(formatEther(signerBalance1)).to.equal('0.0');
+    expect(signerBalance2).to.equal(hundredTokens);
   });
   it('should revert if account which does not own vendor contract attempt to invoke withdraw', async () => {
     const { signers } = await setup();
@@ -80,10 +81,10 @@ describe('YourToken', async () => {
     await signer1.Vendor.buyTokens(oneEth);
     await signer2.Vendor.buyTokens(oneEth);
 
-    await signer1.YourToken.approve(Vendor.address, 100);
-    await signer2.YourToken.approve(Vendor.address, 100);
-    expect(await YourToken.allowance(signer1.address, Vendor.address)).to.equal(100);
-    expect(await YourToken.allowance(signer2.address, Vendor.address)).to.equal(100);
+    await signer1.YourToken.approve(Vendor.address, hundredTokens);
+    await signer2.YourToken.approve(Vendor.address, hundredTokens);
+    expect(await YourToken.allowance(signer1.address, Vendor.address)).to.equal(hundredTokens);
+    expect(await YourToken.allowance(signer2.address, Vendor.address)).to.equal(hundredTokens);
     await signer1.Vendor.sellToken(100);
     await signer2.Vendor.sellToken(100);
     expect(await YourToken.balanceOf(signer1.address)).to.equal(0);
