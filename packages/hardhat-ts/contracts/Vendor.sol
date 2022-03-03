@@ -17,8 +17,8 @@ contract Vendor is Ownable, AccessControl {
         console.log("admin has been granted role: %s", adminHasRole);
     }
 
-    event BuyTokens(address buyer, uint256 amountOfEth, uint256 amountOfTokens);
-    event SellTokens(address seller, uint256 amountOfEth, uint256 amountOfTokens);
+    event BuyTokens(address buyer, uint256 amountOfETH, uint256 amountOfTokens);
+    event SellTokens(address seller, uint256 amountOfETH, uint256 amountOfTokens);
     event WithdrawEther(address to, uint amountOfEth, bool success);
 
     function buyTokens() external payable {
@@ -70,15 +70,18 @@ contract Vendor is Ownable, AccessControl {
     }
 
     function vendorTransfer(uint256 _tokens) private returns (bool _didTransfer) {
-        _tokens = _tokens * (10**18);
         _didTransfer = yourToken.transferFrom(msg.sender, address(this), _tokens);
         require(_didTransfer, "Transfer Unsuccessful");
         console.log("Transfer emitted from: %s, tp: %s, amount: %s", msg.sender, address(this), _tokens);
     }
 
-    function sellToken(uint _tokenAmount) external {
+    function sellTokens(uint _tokenAmount) external {
+        console.log("attempting sale of %s tokens", convertUnit("toEther", _tokenAmount));
         vendorTransfer(_tokenAmount);
-        uint256 ethToSend = _tokenAmount / tokensPerEth;
+        //token amnt= 100 x 10^18
+        //ethToSend = (tokenAmount/ 10^18)/ tokensPerEth
+        uint tokensFormated = convertUnit("toEther", _tokenAmount);
+        uint256 ethToSend = tokensFormated / tokensPerEth;
         uint256 weiToSend = convertUnit("toWei", ethToSend);
         //using .call rather than .send in the event of nonStandard gas fees
         console.log("%s ether converted to %s wei and sent to %s", ethToSend, weiToSend, msg.sender);

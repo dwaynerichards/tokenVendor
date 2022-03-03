@@ -38,8 +38,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
     await Vendor.transferOwnership('0x88e0c097d8e20fdafb05bf419cf60cf8233f72f0');
 
     const adminHasRole = await Vendor.hasRole(Vendor.DEFAULT_ADMIN_ROLE(), admin);
-    const venderRole = await Vendor.hasRole(Vendor.DEFAULT_ADMIN_ROLE(), Vendor.address);
-    console.log('does vendor have default role:', venderRole);
+    console.log('***Vendor Address***', Vendor.address);
     console.log('does admin have role:', adminHasRole);
   } catch (err) {
     console.log('Error: ', err);

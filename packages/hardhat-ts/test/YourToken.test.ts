@@ -85,8 +85,8 @@ describe('YourToken', async () => {
     await signer2.YourToken.approve(Vendor.address, hundredTokens);
     expect(await YourToken.allowance(signer1.address, Vendor.address)).to.equal(hundredTokens);
     expect(await YourToken.allowance(signer2.address, Vendor.address)).to.equal(hundredTokens);
-    await signer1.Vendor.sellToken(100);
-    await signer2.Vendor.sellToken(100);
+    await signer1.Vendor.sellTokens(hundredTokens);
+    await signer2.Vendor.sellTokens(hundredTokens);
     expect(await YourToken.balanceOf(signer1.address)).to.equal(0);
     expect(await YourToken.balanceOf(signer2.address)).to.equal(0);
     //expect(await YourToken.allowance(signer2.address, Vendor.address)).to.equal(50);
