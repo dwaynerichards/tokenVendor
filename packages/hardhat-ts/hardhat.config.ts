@@ -10,6 +10,7 @@ import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';
 import '@tenderly/hardhat-tenderly';
 import 'hardhat-deploy';
+import 'dotenv/config';
 // not required as we are using @nomiclabs/hardhat-ethers@npm:hardhat-deploy-ethers
 
 // import 'solidity-coverage';
@@ -62,7 +63,7 @@ const config: HardhatUserConfig = {
       default: 6,
     },
   },
-  // don't forget to set your provider like:
+  // set your provider like:
   // REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
   // (then your frontend will talk to your contracts on the live network!)
   // (you will need to restart the `yarn run start` dev server after editing the .env)
@@ -80,31 +81,31 @@ const config: HardhatUserConfig = {
       // },
     },
     rinkeby: {
-      url: 'https://rinkeby.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', // <---- YOUR INFURA ID! (or it won't work)
+      url: process.env.RINKEBY_INFURA_KEY,
       accounts: {
         mnemonic: getMnemonic(),
       },
     },
     kovan: {
-      url: 'https://kovan.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', // <---- YOUR INFURA ID! (or it won't work)
+      url: process.env.KOVAN_INFURA_KEY,
       accounts: {
         mnemonic: getMnemonic(),
       },
     },
     mainnet: {
-      url: 'https://mainnet.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', // <---- YOUR INFURA ID! (or it won't work)
+      url: process.env.MAINNET_INFURA_KEY,
       accounts: {
         mnemonic: getMnemonic(),
       },
     },
     ropsten: {
-      url: 'https://ropsten.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', // <---- YOUR INFURA ID! (or it won't work)
+      url: 'https://ropsten.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad',
       accounts: {
         mnemonic: getMnemonic(),
       },
     },
     goerli: {
-      url: 'https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', // <---- YOUR INFURA ID! (or it won't work)
+      url: 'https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad',
       accounts: {
         mnemonic: getMnemonic(),
       },
@@ -318,7 +319,8 @@ task('account', 'Get balance informations for the deployment account.', async (_
     // console.log(config.networks[n],n)
     try {
       const { url } = config.networks[n] as HttpNetworkUserConfig;
-      const provider = new ethers.providers.JsonRpcProvider('');
+      let provider = new ethers.providers.JsonRpcProvider();
+      if (n === 'rinkeby') provider = new ethers.providers.JsonRpcProvider(process.env.RINKEBY_INFURA_KEY);
       const balance = await provider.getBalance(address);
       console.log(` -- ${n} --  -- -- 📡 `);
       console.log(`   balance: ${ethers.utils.formatEther(balance)}`);

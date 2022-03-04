@@ -19,21 +19,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
     const Vendor = await ethers.getContract('Vendor', deployer);
     //@dev totalSupply: inherited function from ER20 standard, returns BigNumber
     const totalSupply = await YourToken.totalSupply();
-    const parsedEth = parseEther('1000');
-    const parsedEquality = parsedEth._hex === totalSupply._hex;
-    //BigNumber needs to be formatted to return a sting
-    console.log(
-      '\n total supply and parsed eth100 are equal \n :',
-      parsedEquality,
-      formatEther(parsedEth),
-      formatEther(totalSupply)
-    );
     console.log('\n 🏵  Sending all 1000 tokens to the Vendor...\n');
     //@dev owner: inherited from Ownable standard, returns  address
-    const ownerAddress = await YourToken.owner();
-    const balanceOf = await YourToken.balanceOf(ownerAddress);
-    console.log('\n token balance of ownerAddress \n:', formatEther(balanceOf));
     await YourToken.transfer(Vendor.address, totalSupply);
+    const vendorTokens = await YourToken.balanceOf(Vendor.address);
+
+    console.log("vendor's current tokens:", formatEther(vendorTokens));
     console.log('\ntransfering ownership to frontend address\n');
     await Vendor.transferOwnership('0x88e0c097d8e20fdafb05bf419cf60cf8233f72f0');
 

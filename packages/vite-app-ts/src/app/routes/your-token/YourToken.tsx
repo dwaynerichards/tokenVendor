@@ -80,7 +80,7 @@ export const YourToken: FC<IYourTokenProps> = (props) => {
     functionArgs: [address, vendorContract?.address],
   });
 
-  if (vendorApproval![0] !== undefined) console.log('🤏 vendorApproval', formatEther(vendorApproval![0]));
+  console.log('🤏 vendorApproval', vendorApproval);
   const [tokenSendToAddress, setTokenSendToAddress] = useState('');
   const [tokenSendAmount, setTokenSendAmount] = useState<number>();
   const [buying, setBuying] = useState(false);
