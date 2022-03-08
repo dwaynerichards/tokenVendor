@@ -57,6 +57,15 @@ describe('YourToken', async () => {
     const signerBalance = await YourToken.balanceOf(signer.address);
     expect(formatEther(signerBalance)).to.equal('100.0');
   });
+  it('should allow correct half purchasing amounts', async () => {
+    const { signers, YourToken } = await setup();
+    const signer = signers[0];
+    const halfEth = formEth(0.5);
+    await signer.Vendor.buyTokens(halfEth);
+    console.log('signer address: ', signer.address);
+    const signerBalance = await YourToken.balanceOf(signer.address);
+    expect(formatEther(signerBalance)).to.equal('50.0');
+  });
   it('should transfer transfer tokens to differnt accounts', async () => {
     const { signers, YourToken } = await setup();
     const [signer1, signer2] = [signers[0], signers[1]];

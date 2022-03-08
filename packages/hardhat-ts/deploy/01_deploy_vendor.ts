@@ -21,16 +21,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
     const totalSupply = await YourToken.totalSupply();
     console.log('\n 🏵  Sending all 1000 tokens to the Vendor...\n');
     //@dev owner: inherited from Ownable standard, returns  address
-    await YourToken.transfer(Vendor.address, totalSupply);
+    const tranferTx = await YourToken.transfer(Vendor.address, totalSupply);
+    await tranferTx.wait();
     const vendorTokens = await YourToken.balanceOf(Vendor.address);
 
     console.log("vendor's current tokens:", formatEther(vendorTokens));
     console.log('\ntransfering ownership to frontend address\n');
-    await Vendor.transferOwnership('0x88e0c097d8e20fdafb05bf419cf60cf8233f72f0');
+    const tx = await Vendor.transferOwnership('0x88e0c097d8e20fdafb05bf419cf60cf8233f72f0');
+    await tx.wait();
 
     const adminHasRole = await Vendor.hasRole(Vendor.DEFAULT_ADMIN_ROLE(), admin);
     console.log('***Vendor Address***', Vendor.address);
-    console.log('does admin have role:', adminHasRole);
+    console.log('does vendor have role:', adminHasRole);
   } catch (err) {
     console.log('Error: ', err);
   }
