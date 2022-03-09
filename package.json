@@ -10,7 +10,7 @@
    ],
    "private": true,
    "scripts": {
-      "verify":"yarn workspace @scaffold-eth/hardhat etherscan-verify",
+      "verify": "yarn workspace @scaffold-eth/hardhat etherscan-verify",
       "chain": "yarn workspace @scaffold-eth/hardhat chain",
       "fork": "yarn workspace @scaffold-eth/hardhat fork",
       "node": "yarn workspace @scaffold-eth/hardhat chain",

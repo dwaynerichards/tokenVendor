@@ -10,7 +10,7 @@ contract YourToken is ERC20, Ownable {
     address public frontend = 0x88E0c097d8e20FDafb05bF419CF60Cf8233F72f0;
     uint number;
 
-    constructor(uint256 _initialSupply) ERC20("Gold", "GLD") {
+    constructor(uint256 _initialSupply) ERC20("Darkwings", "WNGS") {
         uint256 initialSupply = _initialSupply * 10**18;
         _mint(msg.sender, initialSupply);
         uint256 _totalSupply = totalSupply();

@@ -44,7 +44,7 @@ const context: IEthComponentsSettings = {
 
 /**
  * ### Summary
- * The main app component is {@see MainPage} `components/routes/main/MaingPage.tsx`
+ * The main app component is {@see MainPage} `components/routes/main/Main.tsx`
  * This component sets up all the providers, Suspense and Error handling
  * @returns
  */

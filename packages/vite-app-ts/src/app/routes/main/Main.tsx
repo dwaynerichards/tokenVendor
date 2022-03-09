@@ -93,12 +93,19 @@ export const Main: FC = () => {
   useEffect(() => {
     setRoute(window.location.pathname);
   }, [setRoute]);
-
+  //<YourToken mainnetProvider={scaffoldAppProviders.mainnetProvider}></YourToken>
   return (
     <div className="App">
       <MainPageHeader scaffoldAppProviders={scaffoldAppProviders} price={ethPrice} />
-
-      {/* Routes should be added between the <Switch> </Switch> as seen below */}
+      <YourToken mainnetProvider={scaffoldAppProviders.mainnetProvider}></YourToken>;
+      <MainPageFooter scaffoldAppProviders={scaffoldAppProviders} price={ethPrice} />
+    </div>
+  );
+};
+/**
+ * //BELOW LIES PREVIOUS CODE
+ * <div className="App">
+      <MainPageHeader scaffoldAppProviders={scaffoldAppProviders} price={ethPrice} />
       <BrowserRouter>
         <MainPageMenu route={route} setRoute={setRoute} />
         <Switch>
@@ -112,7 +119,6 @@ export const Main: FC = () => {
               appContractConfig={appContractConfig}
             />
           </Route>
-          {/* you can add routes here like the below examlples */}
           <Route path="/hints">
             <Hints
               address={ethersContext?.account ?? ''}
@@ -144,7 +150,5 @@ export const Main: FC = () => {
 
       <MainPageFooter scaffoldAppProviders={scaffoldAppProviders} price={ethPrice} />
     </div>
-  );
-};
-
+ */
 export default Main;
