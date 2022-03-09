@@ -1,16 +1,15 @@
 # 🏗 scaffold-eth | 🏰 BuidlGuidl
 
-Availble via Surge @ https://www.darwingvendor.surge.sh
+Availble via Surge @ https://www.darkwingtokens.surge.sh
 
 🚩 🏵 Token Vendor 🤖
 
 > 🤖 Smart contracts are kind of like "always on" _vending machines_ that **anyone** can access. Let's make a decentralized, digital currency. Then, let's build an unstoppable vending machine that will buy and sell the currency. We'll learn about the "approve" pattern for ERC20s and how contract to contract interactions work.
 
-> 🏵  `YourToken.sol` smart contract  **ERC20** token standard from OpenZeppelin. `Vendor.sol` contract sells your token using a payable `buyTokens()` function.
+> 🏵  `YourToken.sol` smart contract  **ERC20** token standard from OpenZeppelin. `Vendor.sol` contract sells tokens using a payable `buyTokens()` function.
 
 > 🎛  The frontend invites the user to `<input\>` an amount of tokens they want to buy.  Displays a preview of the amount of ETH (or USD) it will cost with a confirm button.
 
-> 🔍 It will be important to verify your token's source code in the block explorer after you deploy. Supporters will want to be sure that it has a fixed supply and you can't just mint more.
 
 > 🏆 The final **deliverable** is an app that lets users purchase and transfer your token. Deployed to Rinkeby Public test Chain 
 
@@ -37,14 +36,9 @@ Make sure you run the commands in the above order. The contract types get genera
 
 ### Checkpoint 3: ⚖️ Vendor 🤖
 
-
-
-
 > 📝 The `buyTokens()` function in `Vendor.sol` should use `msg.value` and `tokensPerEth` to calculate an amount of tokens to `yourToken.transfer()` to `msg.sender`.
 
 > 📟 Emits **event** `BuyTokens(address buyer, uint256 amountOfEth, uint256 amountOfTokens)` when tokens are purchased.
-
-
 
 
 > 📝  Vendor.sol`  inherits _Ownable_.
@@ -59,13 +53,8 @@ Make sure you run the commands in the above order. The contract types get genera
 
 🤓 The `Vendor` should call `yourToken.transferFrom(msg.sender, address(this), theAmount)` and if the user has approved the `Vendor` correctly, tokens should transfer to the `Vendor` and ETH should be sent to the user.
 
-(Use the `Debug Contracts` tab to call the approve and sellTokens() at first but then look in the `YourToken.tsx` for the extra approve/sell UI to uncomment.)
-
-
 ---
 ### Checkpoint 5: 💾 Deploy it! 🛰
-
-
 
 🛰 Use a faucet like [faucet.paradigm.xyz](https://faucet.paradigm.xyz/)
 
@@ -77,9 +66,8 @@ Token Contract:
 https://rinkeby.etherscan.io/address/0x4E1bC94f5dB850ce315295E7C0Db0Ab4ef419220
 
 ### Checkpoint 6: 🚢 Ship it! 🚁
-Availble via Surge @ https://www.darwingvendor.surge.sh
+Availble via Surge @ https://www.darkwingtokens.surge.sh
 ---
-
 
 
 
